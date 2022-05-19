@@ -69,7 +69,7 @@ function draw() {
 function collided(){
   fill(0);
   ellipse(car.pos.x, car.pos.y, 30,30);
-  //noLoop();
+  noLoop();
 }
 
 function keyPressed(){
