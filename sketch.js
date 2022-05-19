@@ -3,23 +3,34 @@
 let carWidth = 50, carHeight = 75, carX = 250, carY = 380;
 
 // Variables for Logic
+
 let platform, car, obs; // Objects
 let carImg, truckImg01, truckImg02, truckImg03, pedestImg01, pedestImg02, bikeImg01, treeImg01; //  Images
 let dist = -100;  //  Where the platform blocks will start
 let millage = 0;  //  Increasing with dist
 
-// Pre-loading images
+// Variables for audioRecognition
+let classifier; 
+let audioResult = '';
+
 function preload(){
+  // Pre-loading images
   carImg = loadImage('images/CarOptions/car03.png');
   truckImg01 = loadImage('images/Obstacles/t01.png');
   truckImg02 = loadImage('images/Obstacles/t02.png');
   truckImg03 = loadImage('images/Obstacles/t03.png');
   pedestImg01 = loadImage('images/Obstacles/p01.png');
   bikeImg01 = loadImage('images/Obstacles/b01.png');
+
+  // Audio Recognition
+  classifier = ml5.soundClassifier('https://teachablemachine.withgoogle.com/models/-73qW3w-_/model.json');
 }
 
 function setup() {
   createCanvas(500, 500);
+
+  // Audio recognition
+  classifyAudio();
   
   noStroke();
   platform = new Platform();
@@ -46,8 +57,9 @@ function draw() {
   obs.build();
 
   //To enable continuous keys:
-  keyPressed();
-  
+  //keyPressed();
+
+
   //Gameplay
   if(car.pos.x < 110 || car.pos.x > (390-carWidth)){
     // Hitting the Platforms
@@ -66,10 +78,11 @@ function draw() {
   //console.log(millage);
 }
 
+
 function collided(){
   fill(0);
   ellipse(car.pos.x, car.pos.y, 30,30);
-  //noLoop();
+  noLoop();
 }
 
 function keyPressed(){
@@ -113,7 +126,7 @@ function Platform(){
       millage += (this.speed*0.1);
     }
     if(dist > 0){
-      dist = -110;
+      dist = -120;
       // Kinda a 'magic number', maybe it is related to max_i being 20. 
       // Change it if you'd like to see why.
     }
@@ -154,5 +167,33 @@ function Obs () {
     }else{
       image(this.randObs,this.obsRx, this.obsRy, this.obsRw, this.obsRh);
     }
+  }
+}
+
+// Audio Recognition stuffs
+function classifyAudio(){
+  classifier.classify((err,res)=>{
+    if(err){
+      console.log(err);
+    }else{
+        audioResult = res[0].label;// The most-confident 'transcript'
+        //console.log(audioResult);
+        driveByAudio();
+    }
+  });
+}
+
+function driveByAudio(){
+  //console.log(audioResult);
+  if(audioResult === 'Up'){
+    platform.speed += 1;
+  }else if(audioResult === 'Down'){
+    platform.speed -= 1;
+  }else if(audioResult === 'Left'){
+    car.move(-10);
+  }else if(audioResult === 'Right'){
+    car.move(10);
+  }else{
+    return;
   }
 }
