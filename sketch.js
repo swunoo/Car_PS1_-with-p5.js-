@@ -9,9 +9,10 @@ let carImg, truckImg01, truckImg02, truckImg03, pedestImg01, pedestImg02, bikeIm
 let dist = -100;  //  Where the platform blocks will start
 let millage = 0;  //  Increasing with dist
 
-// Variables for audioRecognition
+// Variables for Recognition
 let classifier; 
-let audioResult = '';
+//let audioResult = '';
+let video;
 
 function preload(){
   // Pre-loading images
@@ -23,14 +24,21 @@ function preload(){
   bikeImg01 = loadImage('images/Obstacles/b01.png');
 
   // Audio Recognition
-  classifier = ml5.soundClassifier('https://teachablemachine.withgoogle.com/models/-73qW3w-_/model.json');
+  // classifier = ml5.soundClassifier('https://teachablemachine.withgoogle.com/models/-73qW3w-_/model.json');
+
+  // Image Recognition
+  classifier = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/0m5bj7crS/model.json');
 }
 
 function setup() {
   createCanvas(500, 500);
 
   // Audio recognition
-  classifyAudio();
+  //classifyAudio();
+
+  // Video recognition
+  video = createCapture(VIDEO);
+  classifyVideo();
   
   noStroke();
   platform = new Platform();
@@ -41,6 +49,8 @@ function setup() {
 function draw() {
   
   background(200);
+  //image(video,0,0);
+  video.hide();
   
   //Either side of the platform
   fill(150);
@@ -58,7 +68,6 @@ function draw() {
 
   //To enable continuous keys:
   //keyPressed();
-
 
   //Gameplay
   if(car.pos.x < 110 || car.pos.x > (390-carWidth)){
@@ -170,6 +179,7 @@ function Obs () {
   }
 }
 
+/* 
 // Audio Recognition stuffs
 function classifyAudio(){
   classifier.classify((err,res)=>{
@@ -192,6 +202,33 @@ function driveByAudio(){
   }else if(audioResult === 'Left'){
     car.move(-10);
   }else if(audioResult === 'Right'){
+    car.move(10);
+  }else{
+    return;
+  }
+}
+*/
+
+// Video Stuff
+function classifyVideo(){
+  classifier.classify(video, gotResults);
+}
+function gotResults(err,res){
+  if(err)return;
+  else{
+    console.log(res[0].label);
+    driveByVideo(res[0].label);
+    classifyVideo();
+  }
+}
+function driveByVideo(videoRes){
+  if(videoRes === 'Up'){
+    platform.speed += 1;
+  }else if(videoRes === 'Down'){
+    platform.speed -= 1;
+  }else if(videoRes === 'Left'){
+    car.move(-10);
+  }else if(videoRes === 'Right'){
     car.move(10);
   }else{
     return;
