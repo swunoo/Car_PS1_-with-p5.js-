@@ -5,7 +5,7 @@ let carWidth = 50, carHeight = 75, carX = 250, carY = 380;
 // Variables for Logic
 
 let platform, car, obs; // Objects
-let carImg, truckImg01, truckImg02, truckImg03, pedestImg01, pedestImg02, bikeImg01, treeImg01; //  Images
+let carImg, truckImg01, truckImg02, truckImg03, pedestImg01, pedestImg02, bikeImg01, treeImg01, explosion; //  Images
 let dist = -100;  //  Where the platform blocks will start
 let millage = 0;  //  Increasing with dist
 
@@ -22,12 +22,12 @@ function preload(){
   truckImg03 = loadImage('images/Obstacles/t03.png');
   pedestImg01 = loadImage('images/Obstacles/p01.png');
   bikeImg01 = loadImage('images/Obstacles/b01.png');
-
+  explosionImg = loadImage('images/damage.png');
   // Audio Recognition
   // classifier = ml5.soundClassifier('https://teachablemachine.withgoogle.com/models/-73qW3w-_/model.json');
 
   // Image Recognition
-  classifier = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/0m5bj7crS/model.json');
+  //classifier = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/llp0Pt4jj/model.json');
 }
 
 function setup() {
@@ -37,20 +37,24 @@ function setup() {
   //classifyAudio();
 
   // Video recognition
-  video = createCapture(VIDEO);
-  classifyVideo();
+  // video = createCapture(VIDEO);
+  // classifyVideo();
   
   noStroke();
   platform = new Platform();
   car = new Car();
   obs = new Obs();
+
+  button = createButton('stop');
+  button.position(500, 500);
+  button.mousePressed(noLoop);
 }
 
 function draw() {
   
   background(200);
   //image(video,0,0);
-  video.hide();
+  //video.hide();
   
   //Either side of the platform
   fill(150);
@@ -67,7 +71,7 @@ function draw() {
   obs.build();
 
   //To enable continuous keys:
-  //keyPressed();
+  keyPressed();
 
   //Gameplay
   if(car.pos.x < 110 || car.pos.x > (390-carWidth)){
@@ -89,8 +93,11 @@ function draw() {
 
 
 function collided(){
-  fill(0);
-  ellipse(car.pos.x, car.pos.y, 30,30);
+  // fill(0);
+  // ellipse(car.pos.x, car.pos.y, 30,30);
+  
+  playAudio('explosion01');
+  image(explosionImg, car.pos.x, car.pos.y, carHeight, carHeight);
   noLoop();
 }
 
@@ -100,8 +107,10 @@ function keyPressed(){
   } else if (keyCode === RIGHT_ARROW && keyIsPressed){
     car.move(5);
   }else if (keyCode === UP_ARROW && keyIsPressed){
+    playAudio('accel');
     platform.speed += 0.1;
   }else if (keyCode === DOWN_ARROW && keyIsPressed){
+    playAudio('decel');
     platform.speed -= 0.1;
   } else{
     return;
@@ -111,6 +120,8 @@ function Car(){
   this.pos = createVector(carX,carY);
   
   this.build = function(){
+    if(this.pos.x<=0 || this.pos.x>=width)this.pos.x = carX;
+    
     image(carImg, this.pos.x, this.pos.y, carWidth, carHeight);
   }
   
@@ -165,6 +176,7 @@ function Obs () {
       this.obsRw = this.obsArr[index][1];
       this.obsRh = this.obsArr[index][2];
       this.offset = -millage;
+      this.randSpeed = random(1,10); // Not working yet.
   }
   this.newObs(); // Calling once initialized.
   
@@ -227,9 +239,9 @@ function driveByVideo(videoRes){
   }else if(videoRes === 'Down'){
     platform.speed -= 1;
   }else if(videoRes === 'Left'){
-    car.move(-10);
+    car.move(10); //Mirrored
   }else if(videoRes === 'Right'){
-    car.move(10);
+    car.move(-10); //Mirrored
   }else{
     return;
   }

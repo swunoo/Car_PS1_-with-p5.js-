@@ -10,6 +10,24 @@
   <body>
     <main>
     </main>
+    <audio src="audio/accel.wav" id="accel"></audio>
+    <audio src="audio/engine.wav" id="engine"></audio>
+    <audio src="audio/decel.wav" id="decel"></audio>
+    <audio src="audio/explosion01.wav" id="explosion01"></audio>
+    <audio src="audio/explosion02.wav" id="explosion02"></audio>
+    <script>
+      let currentAudio;
+      function playAudio(audioID){
+        if(currentAudio){
+          document.getElementById(currentAudio).pause();
+        }
+        document.getElementById(audioID).play();
+        currentAudio = audioID;
+      }
+      function pauseAudio(){
+        
+      }
+    </script>
     <script src="sketch.js"></script>
     <!-- <script src="speech.js"></script> -->
   
