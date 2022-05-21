@@ -54,35 +54,35 @@ function setup() {
   // classifyVideo();
 
   stopBtn = createButton('stop');
-  stopBtn.position(500, 500);
+  stopBtn.position(50, 500);
   stopBtn.mousePressed(function(){noLoop()});
 
   startBtn = createButton('Start');
-  startBtn.position(500,550);
+  startBtn.position(100,500);
   startBtn.mousePressed(startGame);
 
   recordBgBtn = createButton('Classify');
-  recordBgBtn.position(600,600);
+  recordBgBtn.position(50,550);
   recordBgBtn.mousePressed(classifyVideo);
 
   recordBgBtn = createButton('Background');
-  recordBgBtn.position(600,500);
+  recordBgBtn.position(100,550);
   recordBgBtn.mousePressed(recordBg);
 
   recordLeftBtn = createButton('Left');
-  recordLeftBtn.position(550,500);
+  recordLeftBtn.position(150,550);
   recordLeftBtn.mousePressed(recordLeft);
 
   recordRightBtn = createButton('Right');
-  recordRightBtn.position(550,550);
+  recordRightBtn.position(200,550);
   recordRightBtn.mousePressed(recordRight);
 
   recordUpBtn = createButton('Up');
-  recordUpBtn.position(550,600);
+  recordUpBtn.position(250,550);
   recordUpBtn.mousePressed(recordUp);
 
   recordDownBtn = createButton('Down');
-  recordDownBtn.position(550,650);
+  recordDownBtn.position(300,550);
   recordDownBtn.mousePressed(recordDown);
 }
 
@@ -93,9 +93,19 @@ let recordUp = () => record('Up');
 let recordDown = () => record('Down');
 
 function record(label){
-  const logits = features.infer(video);
-  knn.addExample(logits, label);
-  console.log('added for', label);
+
+  //Wait for 2 seconds -> record every 0.1 sec for 3 sec.
+  setTimeout(() => {
+    let t = setInterval(()=>{
+      const logits = features.infer(video);
+      knn.addExample(logits, label);
+      console.log('added for', label);
+    }, 100);
+    setTimeout(() => {
+      clearInterval(t);
+    }, 3000);
+  }, 2000);
+  
 }
 
 function draw() {
@@ -150,8 +160,8 @@ function collided(){
   
   playAudio('explosion01');
   image(explosionImg, car.pos.x, car.pos.y, carHeight, carHeight);
-  game = false;
-  noLoop();
+  //game = false;
+  //noLoop();
 }
 
 function keyPressed(){
@@ -285,8 +295,7 @@ function gotResults(err,res){
     console.log(res.label);
    if(game){
      driveByVideo(res.label);
-      classifyVideo();}
-    
+     classifyVideo();}
   }
 }
 function driveByVideo(videoRes){
