@@ -11,9 +11,11 @@
   </head>
   
   <body>
+
     <div class="header flex">
       <h1>Welcome, please train your model first.</h1>
       <button onclick="startTraining()">Train</button>
+      <button onclick="useModel()"> Use Model </button>
     </div>
     <div class="trainingBtns flex">
       <button>Background Noise</button>
@@ -23,13 +25,18 @@
       <button>Right</button>
     </div>
     <button class="start flex">START</button>
+
+
     <main>
     </main>
+
     <audio src="audio/accel.wav" id="accel"></audio>
     <audio src="audio/engine.wav" id="engine"></audio>
     <audio src="audio/decel.wav" id="decel"></audio>
     <audio src="audio/explosion01.wav" id="explosion01"></audio>
     <audio src="audio/explosion02.wav" id="explosion02"></audio>
+
+    <!-- AudioPlayer -->
     <script>
       let currentAudio;
       function playAudio(audioID){
@@ -39,13 +46,6 @@
         document.getElementById(audioID).play();
         currentAudio = audioID;
       }
-      function pauseAudio(){
-        
-      }
     </script>
-    <!-- <script src="modelTraining.js"></script> -->
     <script src="sketch.js"></script>
-    <!-- <script src="speech.js"></script> -->
-  
-
 </body></html>

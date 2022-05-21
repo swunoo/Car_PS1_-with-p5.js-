@@ -27,6 +27,11 @@ function preload(){
   bikeImg01 = loadImage('images/Obstacles/b01.png');
   explosionImg = loadImage('images/damage.png');
   bushImg = loadImage('images/Obstacles/others/o01.png');
+  // Audio Recognition
+  // classifier = ml5.soundClassifier('https://teachablemachine.withgoogle.com/models/-73qW3w-_/model.json');
+
+  // Image Recognition
+  //classifier = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/llp0Pt4jj/model.json');
 }
 
 function startGame(){
@@ -74,10 +79,23 @@ function useModel(){
 function setup() {
   createCanvas(500, 500);
 
+  // Audio recognition
+  //classifyAudio();
 
   // Video recognition
-  features = ml5.featureExtractor('MobileNet', ()=>console.log("model is ready"));
+  
+  features = ml5.featureExtractor('MobileNet', modelReady);
   knn = ml5.KNNClassifier();
+  // classifyVideo();
+
+}
+
+function modelReady(){
+  console.log("model is ready");
+  //   knn.load("model.json", function() {
+//     console.log('knn is loaded');
+//     startGame();
+//   });
 }
 
 function record(label){
@@ -100,42 +118,54 @@ function draw() {
   
   if(game){
     background(200);
+    //image(video,0,0);
+    //video.hide();
     
-    //  Either side of the platform
+    //Either side of the platform
     fill('#72CC50');
     rect(0,0,100,500);
     rect(400,0,100,500);
     
-    //  Objects to move.
+    //Platform
     platform.move();
+    
+    //Player's Car
     car.build();
+    
+    //Obstacles
     obs.build();
   
-    //  Enabling ontinuous keys:
+    //To enable continuous keys:
     keyPressed();
   
-    //  Gameplay
+    //Gameplay
     if(car.pos.x < 110 || car.pos.x > (390-carWidth)){
       // Hitting the Platforms
      collided();
     }else if((obs.obsRy >= carY && obs.obsRy <= carY + carHeight) || (obs.obsRy + obs.obsRh >= carY && obs.obsRy+obs.obsRh <= carY + carHeight)){
       // Hitting the obstacles
       if(obs.collision(car.pos.x+5, car.pos.x+45)){
-        // 5 is to compensate for the png's padding.
+        // 5 to compensate for the png's padding.
         collided();
       }
     }
-    //  Shows millage
+    //Shows millage
     textSize(20);
     text((millage*0.01).toFixed(1),5,70);
+    //console.log(millage);
+  
   }
+
+  
 }
 
+
 function collided(){
+  // fill(0);
+  // ellipse(car.pos.x, car.pos.y, 30,30);
+  
   playAudio('explosion01');
   image(explosionImg, car.pos.x, car.pos.y, carHeight, carHeight);
-
-  // Stopping the game:
   //game = false;
   //noLoop();
 }
@@ -184,6 +214,11 @@ function Platform(){
       fill(255);
       rect(247,i*30 + dist,6,15);
       millage += (this.speed*0.1);
+
+      // if(i%5 === 0){
+      //   image(bushImg,100, i*30+dist,30,30)
+      //   image(bushImg,300, i*30+dist,30,30)
+      // }
     }
     if(dist > 0){
       dist = -120;
@@ -231,7 +266,37 @@ function Obs () {
   }
 }
 
-// Video Recognition
+/* 
+// Audio Recognition stuffs
+function classifyAudio(){
+  classifier.classify((err,res)=>{
+    if(err){
+      console.log(err);
+    }else{
+        audioResult = res[0].label;// The most-confident 'transcript'
+        //console.log(audioResult);
+        driveByAudio();
+    }
+  });
+}
+
+function driveByAudio(){
+  //console.log(audioResult);
+  if(audioResult === 'Up'){
+    platform.speed += 1;
+  }else if(audioResult === 'Down'){
+    platform.speed -= 1;
+  }else if(audioResult === 'Left'){
+    car.move(-10);
+  }else if(audioResult === 'Right'){
+    car.move(10);
+  }else{
+    return;
+  }
+}
+*/
+
+// Video Stuff
 function classifyVideo(){
   const logits = features.infer(video);
   knn.classify(logits, gotResults);
