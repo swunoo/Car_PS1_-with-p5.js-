@@ -4,9 +4,9 @@ let carWidth = 50, carHeight = 75, carX = 250, carY = 380;
 
 // Variables for Logic
 
-let game = false;
+let game = false, recordsNum = 0;
 let platform, car, obs; // Objects
-let carImg, truckImg01, truckImg02, truckImg03, pedestImg01, pedestImg02, bikeImg01, treeImg01, explosion; //  Images
+let carImg, truckImg01, truckImg02, truckImg03, pedestImg01, pedestImg02, bikeImg01, treeImg01, explosion, bushImg; //  Images
 let dist = -100;  //  Where the platform blocks will start
 let millage = 0;  //  Increasing with dist
 
@@ -24,6 +24,7 @@ function preload(){
   pedestImg01 = loadImage('images/Obstacles/p01.png');
   bikeImg01 = loadImage('images/Obstacles/b01.png');
   explosionImg = loadImage('images/damage.png');
+  bushImg = loadImage('images/Obstacles/others/o01.png');
   // Audio Recognition
   // classifier = ml5.soundClassifier('https://teachablemachine.withgoogle.com/models/-73qW3w-_/model.json');
 
@@ -33,13 +34,34 @@ function preload(){
 
 function startGame(){
   video.hide();
+  document.querySelector('.trainingBtns').style.display = 'none';
+  document.querySelector('.start').style.display = 'none';
+  document.querySelector('main').style.display = 'block';
   noStroke();
   platform = new Platform();
   car = new Car();
   obs = new Obs();
 
   game = true;
+  classifyVideo();
 }
+
+function startTraining(){
+  video = createCapture(VIDEO);
+  video.size(900,450);
+  document.querySelector('.header button').style.display = 'none';
+  document.querySelector('.trainingBtns').style.display = 'flex';
+  document.querySelectorAll('.trainingBtns button')
+    .forEach(element => element.addEventListener('click', (e)=>{
+      record(e.target.innerHTML);
+    }));
+
+  document.querySelector('.start').addEventListener('click', (e)=>{
+    startGame();
+  })
+}
+
+
 
 function setup() {
   createCanvas(500, 500);
@@ -48,52 +70,15 @@ function setup() {
   //classifyAudio();
 
   // Video recognition
-  video = createCapture(VIDEO);
+  
   features = ml5.featureExtractor('MobileNet', ()=>console.log("ready"));
   knn = ml5.KNNClassifier();
   // classifyVideo();
 
-  stopBtn = createButton('stop');
-  stopBtn.position(50, 500);
-  stopBtn.mousePressed(function(){noLoop()});
-
-  startBtn = createButton('Start');
-  startBtn.position(100,500);
-  startBtn.mousePressed(startGame);
-
-  recordBgBtn = createButton('Classify');
-  recordBgBtn.position(50,550);
-  recordBgBtn.mousePressed(classifyVideo);
-
-  recordBgBtn = createButton('Background');
-  recordBgBtn.position(100,550);
-  recordBgBtn.mousePressed(recordBg);
-
-  recordLeftBtn = createButton('Left');
-  recordLeftBtn.position(150,550);
-  recordLeftBtn.mousePressed(recordLeft);
-
-  recordRightBtn = createButton('Right');
-  recordRightBtn.position(200,550);
-  recordRightBtn.mousePressed(recordRight);
-
-  recordUpBtn = createButton('Up');
-  recordUpBtn.position(250,550);
-  recordUpBtn.mousePressed(recordUp);
-
-  recordDownBtn = createButton('Down');
-  recordDownBtn.position(300,550);
-  recordDownBtn.mousePressed(recordDown);
 }
 
-let recordBg = () => record('Background Noise');
-let recordLeft = () => record('Left');
-let recordRight = () => record('Right');
-let recordUp = () => record('Up');
-let recordDown = () => record('Down');
-
 function record(label){
-
+  recordsNum++;
   //Wait for 2 seconds -> record every 0.1 sec for 3 sec.
   setTimeout(() => {
     let t = setInterval(()=>{
@@ -105,7 +90,7 @@ function record(label){
       clearInterval(t);
     }, 3000);
   }, 2000);
-  
+  if(recordsNum >= 4)document.querySelector('.start').style.display = 'block';
 }
 
 function draw() {
@@ -207,6 +192,11 @@ function Platform(){
       fill(255);
       rect(247,i*30 + dist,6,15);
       millage += (this.speed*0.1);
+
+      // if(i%5 === 0){
+      //   image(bushImg,100, i*30+dist,30,30)
+      //   image(bushImg,300, i*30+dist,30,30)
+      // }
     }
     if(dist > 0){
       dist = -120;

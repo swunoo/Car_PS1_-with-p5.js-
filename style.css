@@ -1,8 +1,42 @@
 html, body {
   margin: 0;
   padding: 0;
+  background-color: #eee;
+  color:#333;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+body{
+  display: flex; justify-content: center; align-items: center;
+  flex-direction: column; gap:1vmin;
+}
+
+main{
+  display:none;
 }
 canvas {
   display: block;
 }
+
+button{
+  border:none;
+  border-radius: 5px;
+  background-color: #555;
+  color:#eee;
+  padding:1vmin 2vmin;
+  cursor: pointer;
+}
+
+.flex{
+  display: flex; justify-content: center; align-items: center;
+  gap:0.5vmin;
+}
+.header{
+  flex-direction: column;
+}
+
+.trainingBtns, .start{
+  display:none;
+}
+
+
 
