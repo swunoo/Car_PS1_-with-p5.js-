@@ -69,12 +69,8 @@ function useModel(){
 })  
 }
 
-
-
 function setup() {
   createCanvas(500, 500);
-
-
   // Video recognition
   features = ml5.featureExtractor('MobileNet', ()=>console.log("model is ready"));
   knn = ml5.KNNClassifier();
@@ -87,6 +83,7 @@ function record(label){
     let t = setInterval(()=>{
       const logits = features.infer(video);
       knn.addExample(logits, label);
+      document.getElementById('recordCount').innerHTML = "Recording for " + label;
       console.log('added for', label);
     }, 100);
     setTimeout(() => {
@@ -253,13 +250,13 @@ function gotResults(err,res){
 }
 function driveByVideo(videoRes){
   if(videoRes === 'Up'){
-    platform.speed += 1;
+    platform.speed += 0.1;
   }else if(videoRes === 'Down'){
-    platform.speed -= 1;
+    platform.speed -= 0.1;
   }else if(videoRes === 'Left'){
-    car.move(10); //Mirrored
+    car.move(5); //Mirrored
   }else if(videoRes === 'Right'){
-    car.move(-10); //Mirrored
+    car.move(-5); //Mirrored
   }else{
     return;
   }
