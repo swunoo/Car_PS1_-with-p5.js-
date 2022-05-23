@@ -15,10 +15,10 @@ function draw() {
   snake.show();
   food.show();
   
-  if((food.vertices.includes(snake.x) && food.vertices.includes(snake.x + snake.xLen)) || 
-   (food.vertices.includes(snake.y) &&     food.vertices.includes(snake.y + snake.yLen)) ){
-    snake.grow();
-  }
+  if((snake.x <= 0 || snake.x + snake.xLen >= 300)
+    || (snake.y <= 0 || snake.y + snake.yLen >= 300)){
+      snake.collided();
+    }
 }
 
 function keyPressed(){
@@ -62,12 +62,11 @@ function turnSnakeX(){
     snake.turnY = snake.y + snake.posChangeY;
     snake.turnLenX = 10;
     snake.lenChange = 10;
-    snake.turnPt = 'fromAxisX';
+    snake.turnPt = false; // From axisX = false, else true.
     snake.turning = true;
 }
 
 function turnSnakeY(){
-
     if(snake.dir < 0){
         snake.turnY = snake.y;
         snake.posChangeY = 0;
@@ -78,22 +77,8 @@ function turnSnakeY(){
     snake.turnX = snake.x + snake.posChangeX;
     snake.turnLenY = 10;
     snake.lenChange = 10;
-    snake.turnPt = 'fromAxisY';
+    snake.turnPt = true;
     snake.turning = true;
-
-    // rect(this.turnX,this.turnY,this.turnLenX,this.turnLenY);
-    // if(snake.dir > 0){
-    //     // snake.turnX = snake.x // + posChangeX
-    //     // snake.turnLenX = snake.x // + Change
-
-    //     // snake.turnY = snake.y;
-    //     // snake.turnLenY = 10;
-    //     //snake.posChangeY = 10;
-
-    // }else{
-    //     snake.turnX = snake.x;
-    //     snake.posChangeX = 0;
-    // }
 } 
 
 function Snake(){
@@ -128,12 +113,13 @@ function Snake(){
     }
   }
   this.cont = function(){
+    this.checkForPts();
     if(this.turning) this.rotate();
       else if(this.xAxis) this.x += this.dir;
         else this.y += this.dir;
   }
   this.rotate = function(){
-    if(this.turnPt === 'fromAxisX'){
+    if(!this.turnPt){
         this.turnY += this.posChangeY;
         this.turnLenY += this.lenChange;  
 
@@ -149,7 +135,7 @@ function Snake(){
             this.xAxis = false;
             this.turning = false;
         }
-    } else if(this.turnPt === 'fromAxisY'){
+    } else {
         this.turnX += this.posChangeX;
         this.turnLenX += this.lenChange;  
 
@@ -165,27 +151,39 @@ function Snake(){
             this.xAxis = true;
             this.turning = false;
         }
-    }
-    
-
+      }
   }
+  this.checkForPts = function(){
+      for(let i = 0; i<4; i++){
+        if((food.vertices[i][0] >= snake.x && food.vertices[i][0] <= snake.x + snake.xLen) && (food.vertices[i][1] >= snake.y && food.vertices[i][1] <= snake.y + snake.yLen)){
+          snake.grow();
+          food.randomize();
+          console.log('met');
+          return;
+        }
+      }
+    }
   this.grow = function(){
+    console.log("growing")
     if(this.xAxis) this.xLen+=10;
       else this.yLen+=10;
+  }
+  this.collided = function(){
+    fill(255);
+    ellipse(this.x, this.y, 10,10);
+    noLoop();
   }
 }
 
 function Food(){
   this.show = function(){
-    if(eaten) this.randomize();
     fill(100);
     rect(this.x, this.y, 10,10);
-    this.vertices = [this.x, this.y, this.x+10, this.y+10];
   }
   this.randomize = function(){
     this.x = random(20,280);
     this.y = random(20,280);
+    this.vertices = [[this.x, this.y], [this.x+10, this.y], [this.x, this.y+10], [this.x+10, this.y+10]];
   }
-  this.vertices = [];
   this.randomize();
 }
