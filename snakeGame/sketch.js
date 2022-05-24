@@ -1,17 +1,26 @@
-let snake, food;
-let eaten = false;
+let snake, food, explo;
+let knn, features, video;
+
+let resArr = ['Background Noise', 'Up', 'Down', 'Left',  'Right'];
+
+function preload(){
+  explo = loadImage('damage.png');
+}
 
 function setup() {
   createCanvas(300, 300);
   noStroke();
-  snake = new Snake();
-  food = new Food();
+
+    // Video recognition
+    features = ml5.featureExtractor('MobileNet', ()=>console.log("model is ready"));
+    knn = ml5.KNNClassifier();
   
-  setInterval(()=>{snake.cont()}, 500);
 }
 
 function draw() {
-  background(150);
+  if(!snake) return;
+  
+  background(50);
   snake.show();
   food.show();
   
@@ -20,6 +29,73 @@ function draw() {
       snake.collided();
     }
 }
+
+function startGame(){
+  video.hide();
+
+  snake = new Snake();
+  food = new Food();
+  setInterval(()=>{snake.cont()}, 500);
+
+  classifyVideo();
+}
+
+// Video Recognition
+function useModel(){
+  video = createCapture(VIDEO);
+  video.size(900,450);
+  knn.load("model.json", function() {
+        console.log('model is loaded');
+        startGame();
+})  
+}
+
+function classifyVideo(){
+  const logits = features.infer(video);
+  knn.classify(logits,gotResults);
+}
+function gotResults(err,res){
+  if(err) console.error(err);
+  else{
+  contByVideo(resArr[res.label]);
+  classifyVideo();
+    }
+  }
+
+function contByVideo(videoRes){
+  // Basically the same config from keyPressed.
+  // Left and Right are mirrored.
+  console.log(videoRes);
+  if(snake.turning) return;
+  if(videoRes === 'Up'){
+    if(!snake.xAxis){
+      snake.dir = -10;
+    } else {
+      snake.posChangeY = -10;
+      turnSnakeX();
+    }
+  }else if(videoRes === 'Down'){
+    if(!snake.xAxis){
+      snake.dir = 10;
+    } else {
+      turnSnakeX();
+    }
+  }else if(videoRes === 'Right'){
+    if(snake.xAxis) snake.dir = -10;
+    else{
+      snake.posChangeX = -10;
+      turnSnakeY();
+    }
+  }else if(videoRes === 'Left'){
+    if(snake.xAxis) snake.dir = 10;
+    else{
+      turnSnakeY();
+    }
+  }else{
+    return;
+  }
+}
+
 
 function keyPressed(){
   if (keyCode === LEFT_ARROW){
@@ -106,7 +182,7 @@ function Snake(){
   
   
   this.show = function(){
-    fill(200);
+    fill('#32cd32');
     rect(this.x, this.y, this.xLen, this.yLen);
     if(this.turning) {
       rect(this.turnX,this.turnY,this.turnLenX,this.turnLenY);
@@ -170,20 +246,20 @@ function Snake(){
   }
   this.collided = function(){
     fill(255);
-    ellipse(this.x, this.y, 10,10);
+    image(explo, this.x, this.y, 50, 50);
     noLoop();
   }
 }
 
 function Food(){
   this.show = function(){
-    fill(100);
-    rect(this.x, this.y, 10,10);
+    fill('#d3f150');
+    ellipse(this.x, this.y, 10,10);
   }
   this.randomize = function(){
     this.x = random(20,280);
     this.y = random(20,280);
-    this.vertices = [[this.x, this.y], [this.x+10, this.y], [this.x, this.y+10], [this.x+10, this.y+10]];
+    this.vertices = [[this.x+5, this.y], [this.x, this.y+5], [this.x-5, this.y], [this.x, this.y-5]];
   }
   this.randomize();
 }
