@@ -1,15 +1,15 @@
 
 
 function startSnakeGame(){
-  video.hide();
-  document.querySelector('#recordCount').style.display = 'none';
+  if(video) video.hide();  
+
   noStroke();
-  createCanvas(300, 300);
+  createCanvas(390, 390);
   snake = new Snake();
   food = new Food();
   setInterval(()=>{snake.cont()}, 500);
 
-  //classifyVideo();
+  // if(detect) classifyVideo();
 }
 
 function contByVideo(videoRes){
@@ -83,7 +83,7 @@ function Snake(){
 //  Main variables
   this.x = random(100,200);
   this.y = random(100,200);
-  this.xLen = 50;
+  this.xLen = 30;
   this.yLen = 10;
 
 //  Turning
@@ -103,7 +103,7 @@ function Snake(){
   
   
   this.show = function(){
-    fill('#32cd32');
+    fill('#FFBA08');
     rect(this.x, this.y, this.xLen, this.yLen);
     if(this.turning) {
       rect(this.turnX,this.turnY,this.turnLenX,this.turnLenY);
@@ -174,7 +174,7 @@ function Snake(){
 
 function Food(){
   this.show = function(){
-    fill('#d3f150');
+    fill('#D00000');
     ellipse(this.x, this.y, 10,10);
   }
   this.randomize = function(){

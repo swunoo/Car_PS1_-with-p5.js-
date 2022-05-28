@@ -12,15 +12,16 @@ function preload(){
 }
 
 function startCarGame(){
-  video.hide();  
-  document.querySelector('#recordCount').style.display = 'none';
+  
+  if(video) video.hide();  
+
   noStroke();
   createCanvas(500, 500);
   platform = new Platform();
   car = new Car();
   obs = new Obs();
 
-  //classifyVideo();
+  // if(detect) classifyVideo();
 }
 
 function Car(){

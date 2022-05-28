@@ -15,89 +15,181 @@ let millage = 0;  //  Increasing with dist
 let classifier; 
 //let audioResult = '';
 // let video, features, knn;
-let userModel = true;
+let gameScr = false;
 let newModel = true;
-let resArr = ['Background Noise', 'Up', 'Down', 'Left',  'Right'];
+let detect = true;
+let modelReady = false;
+let resReceived = false;
+let resArr = ['Background-Noise', 'Up', 'Down', 'Left',  'Right'];
 
 /* For Snake */
 let snake, food;
 
+/* DOM with ARROWKEYS */
+
+let cardNum = 0;
+document.querySelector('.gestureGame').style.border = '3px solid white';
+
+// setTimeout(() => {
+//   video = createCapture(VIDEO);
+// video.hide();
+// }, 1000);
+
+
+setInterval(() => {
+  resReceived = false;
+}, 1000);
+
+window.addEventListener('keydown',(e)=>{
+  // if (e.key)
+  console.log(e.key);
+
+  if(e.key === 'ArrowRight'){
+    document.querySelectorAll('.gameOption')[cardNum].style.border = 'none';
+    if(cardNum === 6) cardNum = -1;
+    cardNum++;
+    document.querySelectorAll('.gameOption')[cardNum].style.border = '3px solid white';
+  } else if (e.key === 'ArrowLeft'){
+    document.querySelectorAll('.gameOption')[cardNum].style.border = 'none';
+    if(cardNum === 0) cardNum = 7;
+    cardNum--;
+    document.querySelectorAll('.gameOption')[cardNum].style.border = '3px solid white';
+  } else if (e.key === 'ArrowUp'){
+    document.querySelectorAll('.gameOption')[cardNum].click();
+  }
+  
+})
+
+function scrollByVideo(videoRes){
+  if(resReceived) return;
+  else{
+    if(videoRes === 'Background-Noise' || videoRes === 'Down') return;
+      else if(videoRes === 'Up'){
+        document.querySelectorAll('.gameOption')[cardNum].click();
+      } else if (videoRes === 'Left'){
+        document.querySelectorAll('.gameOption')[cardNum].style.border = 'none';
+        if(cardNum === 0) cardNum = 7;
+        cardNum--;
+        document.querySelectorAll('.gameOption')[cardNum].style.border = '3px solid white';
+      } else if (videoRes === 'Right'){
+        document.querySelectorAll('.gameOption')[cardNum].style.border = 'none';
+        if(cardNum === 6) cardNum = -1;
+        cardNum++;
+        document.querySelectorAll('.gameOption')[cardNum].style.border = '3px solid white';
+      }
+      resReceived = true;
+  }
+}
+
+
 /* DOM LINKING */
 
+function showGameMenu(){}
+
 function playSnake(){
-  if(newModel){
-    startSnakeGame();
-  } else {
-    useModel('snake');
-  }
+  document.querySelector('.gameScr').style.display = 'none';
+  startSnakeGame();
+  // if(newModel){
+  //   startSnakeGame();
+  // } else {
+  //   useModel('snake');
+  // }
 }
 function playCar(){
-  if(newModel){
-    startCarGame();
-  } else {
-    useModel('car');
-  }
+  document.querySelector('.gameScr').style.display = 'none';
+  startCarGame();
 }
 
+function noDetection(){
+  if(!modelReady) return;
 
+  detect = false;
+  createCanvas(900,600);
+  document.querySelector('.trainingScr').style.display = 'flex';
+  document.querySelector('.btnScr').style.display = 'none';
+  document.querySelector('.gameScr').style.display = 'flex';
 
+}
 
 // Video recognition
-features = ml5.featureExtractor('MobileNet', ()=>console.log("model is ready"));
+features = ml5.featureExtractor('MobileNet', ()=>{
+  console.log("model is ready");
+  modelReady = true;
+});
 knn = ml5.KNNClassifier();
 
 function startTraining(){
+  if(!modelReady) return;
+
     video = createCapture(VIDEO);
-    video.size(900,450);
-    [...document.querySelectorAll('.header button')].forEach(btn=>{
-        btn.style.display = 'none';
-    })
-    document.querySelector('.trainingBtns').style.display = 'flex';
-    document.querySelectorAll('.trainingBtns button')
+    video.size(900,600);
+    video.hide();
+    createCanvas(900,600);
+
+    document.querySelector('.trainingScr').style.display = 'flex';
+    document.querySelector('.btnScr').style.display = 'none';
+    document.querySelector('.videoCtrl').style.display = 'flex';
+    document.querySelectorAll('.videoBtn')
       .forEach(element => element.addEventListener('click', (e)=>{
         record(e.target.innerHTML);
       }));
   
-    document.querySelector('.startCar').addEventListener('click', (e)=>{
-      //knn.save('model.json');
-
-        document.querySelector('.startBtns').style.display = 'none';
-        document.querySelector('.trainingBtns').style.display = 'none';
-      startCarGame();
-    })
-  
-    document.querySelector('.startSnake').addEventListener('click', (e)=>{
-      //knn.save('model.json');
-        document.querySelector('.startBtns').style.display = 'none';
-        document.querySelector('.trainingBtns').style.display = 'none';
-      startSnakeGame();
+    document.querySelector('.trainingScr button').addEventListener('click', (e)=>{
+      knn.save('model.json');
+      gameScr = true;
+      document.querySelector('.videoCtrl').style.display = 'none';
+      document.querySelector('.videoPanel').style.marginLeft = '15vw';
+      document.querySelector('.gameScr').style.display = 'flex';
+      classifyVideo();
     })
   }
 
+  const recordNumEach = document.querySelector('#recordNumEach');
+
   function record(label){
     //Wait for 2 seconds -> record every 0.1 sec for 3 sec.
+    document.querySelector('#recordTypeEach').innerHTML = label;
     setTimeout(() => {
       let t = setInterval(()=>{
         const logits = features.infer(video);
         knn.addExample(logits, label);
-        document.getElementById('recordCount').innerHTML = "Recording for " + label;
-        console.log('added for', label);
-      }, 100);
+
+        document.querySelector(`#${label}`).innerHTML = (Number)(document.querySelector(`#${label}`).innerHTML) + 1;
+        document.querySelector('#recordNumEach').innerHTML =  document.querySelector(`#${label}`).innerHTML;
+
+      }, 300);
       setTimeout(() => {
         clearInterval(t);
       }, 3000);
     }, 2000);
   }
 
+  function useDefaultModel(){
+    if(!modelReady) return;
 
+    newModel = false;
+
+    video = createCapture(VIDEO);
+    video.size(900,600);
+    video.hide();
+    createCanvas(900,600);
+
+    document.querySelector('.btnScr').style.display = 'none';
+    document.querySelector('.gameScr').style.display = 'flex';
+    document.querySelector('.trainingScr').style.display = 'flex';
+    
+    knn.load("model.json", function() {
+      console.log('model is loaded');
+      classifyVideo();
+    })
+  }
 
 
 
   
 function draw() {
-
     if(car){
-        background(200);
+      background(200);
 
       //  Either side of the platform
       fill('#72CC50');
@@ -128,15 +220,17 @@ function draw() {
       text((millage*0.01).toFixed(1),5,70);
 
     } else if(snake){
-        background(50);
+        background('#72CC50');
 
         snake.show();
         food.show();
         
-        if((snake.x <= 0 || snake.x + snake.xLen >= 300)
-          || (snake.y <= 0 || snake.y + snake.yLen >= 300)){
+        if((snake.x <= 0 || snake.x + snake.xLen >= 390)
+          || (snake.y <= 0 || snake.y + snake.yLen >= 390)){
             snake.collided();
           }
+    } else if(video && !gameScr){
+        image(video, 0,0,900,600);
     }
 }
 
@@ -150,28 +244,22 @@ function classifyVideo(){
 function gotResults(err,res){
 if(err) console.error(err);
 else{
-    console.log(res.label);
-    if(userModel){
+    if(newModel){
+        console.log(res.label);
         if(car) driveByVideo(res.label);
-        else contByVideo(res.label);
+        else if (snake) contByVideo(res.label);
+        else scrollByVideo(res.label);
     }else{
+        console.log(resArr[res.label]);
         if(car) driveByVideo(resArr[res.label]);
-        else contByVideo(resArr[res.label]);
+        else if (snake) contByVideo(resArr[res.label]);
+        else scrollByVideo(resArr[res.label]);
     }
     classifyVideo();
 }
 }
 
-function useModel(gameName){
-    video = createCapture(VIDEO);
-    video.size(900,450);
-    userModel = false;
-    knn.load("model.json", function() {
-          console.log('model is loaded');
-          if(gameName === 'car')startCarGame();
-            else if(gameName === 'snake')startSnakeGame();
-  })  
-  }
+
 
   function keyPressed(){
     if(car){
@@ -181,10 +269,10 @@ function useModel(gameName){
             car.move(5);
           }else if (keyCode === UP_ARROW && keyIsPressed){
             playAudio('accel');
-            platform.speed += 0.1;
+            platform.speed += 1;
           }else if (keyCode === DOWN_ARROW && keyIsPressed){
             playAudio('decel');
-            platform.speed -= 0.1;
+            platform.speed -= 1;
           }
     } else {
         if (keyCode === LEFT_ARROW){

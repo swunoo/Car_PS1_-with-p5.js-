@@ -39,6 +39,7 @@ svg{
     backdrop-filter: blur(10px);
     box-shadow: 0 0 3px gray;
     width:15vw;
+    z-index: 10;
     /* padding-top: 3vmin; */
 }
 
@@ -136,10 +137,12 @@ h2{
 
 /* Content */
 .content{
-    padding-top: 5vmin;
+    /* padding-top: 5vmin; */
     display: flex;
     flex-direction: column;
     padding-left: 15vw;
+    width:80vw;
+    height:90vh;
 }
 .ICONS{
     display:none;
@@ -151,7 +154,10 @@ h2{
     justify-content: center;
     align-items: center;
     gap:10vw;
-
+    margin:auto;
+    z-index: 10;
+    height: 100%;
+    width: 100%;
 }
 
 .btnImgWrapper{
@@ -166,6 +172,7 @@ h2{
 .btnImg{
     width: 6vw;
     height: 6vw;
+    cursor:pointer;
 }
 .btn{
     display: flex; flex-direction: column;
@@ -181,31 +188,49 @@ h2{
 /* gameScreen */
 .gameScr{
     width: 75vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: start;
     align-items: flex-start;
     padding:0 5vmin;
+    padding-top: 5vmin;
+    z-index: 10;
+    background-color: var(--color1);
 
     display: none;
 
 }
 /* ------------------------------------------ */
 .trainingScr{
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    
-    display:none;
+    position: absolute;
+    top:15vmin;
+    left:50vmin;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap:5vmin;
+    margin:-5vw -5vw;
+
+    display: none;
 }
 
 .videoPanel{
-    width:50vw;
-
+    /* border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 5px #555; */
 }
+
+canvas{
+    border-radius: 20px;
+    box-shadow: 0 0 15px #555;
+}
+
+
 .videoCtrl{
     display: flex; flex-direction: column; gap:5vmin;
     font-size: 2rem;
-
+    display:none;
 }
 
 .videoCtrlBtns{
@@ -242,6 +267,10 @@ h2{
     padding:1vmin 2vmin;
     color:#eee;
     font-size: 2rem;
-    margin-top: 10vmin;
+    margin-top: 5vmin;
+    border-radius: 5px;
+    cursor: pointer;
 }
-
+.gameOption{
+    border-radius: 20px;
+}
