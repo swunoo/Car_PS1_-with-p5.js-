@@ -16,10 +16,31 @@ let classifier;
 //let audioResult = '';
 // let video, features, knn;
 let userModel = true;
+let newModel = true;
 let resArr = ['Background Noise', 'Up', 'Down', 'Left',  'Right'];
 
 /* For Snake */
 let snake, food;
+
+/* DOM LINKING */
+
+function playSnake(){
+  if(newModel){
+    startSnakeGame();
+  } else {
+    useModel('snake');
+  }
+}
+function playCar(){
+  if(newModel){
+    startCarGame();
+  } else {
+    useModel('car');
+  }
+}
+
+
+
 
 // Video recognition
 features = ml5.featureExtractor('MobileNet', ()=>console.log("model is ready"));

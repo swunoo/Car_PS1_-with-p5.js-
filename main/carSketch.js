@@ -23,8 +23,6 @@ function startCarGame(){
   //classifyVideo();
 }
 
-
-
 function Car(){
   this.pos = createVector(carX,carY);
   
